@@ -3009,11 +3009,14 @@ getProportionMito <- function(object, use.norm = F) {
 #' # return list of plots
 #' plots <- plotByDatasetAndCluster(ligerex, return.plots = T)
 #' }
-
+# 'Edited here, added colors in function
+#' clusters = clusts_byCellType
+#' cols<-c("ETP"="#F8766D", "DN2"="#7CAE00", "DN3"="#00BFC4", 
+#' "DN4"="#C77CFF", "ETP-DN2"="#F5F5F5", "DN3-DN4"="#F5F5F5", "z2_unknown"="#F5F5F5")
 plotByDatasetAndCluster <- function(object, clusters = NULL, title = NULL, pt.size = 0.3,
                                     text.size = 3, do.shuffle = T, rand.seed = 1,
                                     axis.labels = NULL, do.legend = T, legend.size = 5,
-                                    return.plots = F) {
+                                    return.plots = F. colors = cols) {
   tsne_df <- data.frame(object@tsne.coords)
   colnames(tsne_df) <- c("tsne1", "tsne2")
   tsne_df[['Dataset']] <- unlist(lapply(1:length(object@H), function(x) {
@@ -3047,6 +3050,7 @@ plotByDatasetAndCluster <- function(object, clusters = NULL, title = NULL, pt.si
   )
   p2 <- ggplot(tsne_df, aes_string(x = 'tsne1', y = 'tsne2', color = 'Cluster')) + geom_point(size = pt.size) +
     geom_text(data = centers, mapping = aes_string(label = 'Cluster'), colour = "black", size = text.size) +
+    scale_color_manual(values=cols)+  
     guides(color = guide_legend(override.aes = list(size = legend.size)))
   
   if (!is.null(title)) {
@@ -3752,7 +3756,8 @@ plotGeneViolin <- function(object, gene, methylation.indices = NULL,
 #' gene_plots <- plotGene(ligerex, "CD4", return.plots = T)
 #' }
 
-plotGene <- function(object, gene, use.raw = F, use.scaled = F, scale.by = 'dataset', 
+#added geneName as we have Ensembl IDs and not gene symbols
+plotGene <- function(object, gene, geneName, use.raw = F, use.scaled = F, scale.by = 'dataset', 
                      log2scale = NULL, methylation.indices = NULL, plot.by = 'dataset', 
                      set.dr.lims = F, pt.size = 0.1, min.clip = NULL, max.clip = NULL, 
                      clip.absolute = F, points.only = F, option = 'plasma', cols.use = NULL, 
@@ -3860,7 +3865,7 @@ plotGene <- function(object, gene, use.raw = F, use.scaled = F, scale.by = 'data
     sub_df$gene[sub_df$gene > max_v & !is.na(sub_df$gene)] <- max_v
     
     ggp <- ggplot(sub_df, aes_string(x = 'dr1', y = 'dr2', color = 'gene')) + geom_point(size = pt.size) +
-      labs(col = gene)
+      labs(col = geneName)
     
     if (!is.null(cols.use)) {
       ggp <- ggp + scale_color_gradientn(colors = cols.use,
